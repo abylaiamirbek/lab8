@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"html/template"
 	"net/http"
 )
@@ -16,14 +17,18 @@ func main() {
 }
 
 func submitHandler(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseForm(); err != nil {
+		fmt.Fprintf(w, "ParseForm() err: %v", err)
+		return
+	}
 	name := r.FormValue("name")
 	age := r.FormValue("age")
-	t, err := template.ParseFiles("index.html")
+	t, err := template.ParseFiles("static/getForm.html")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	err = t.Execute(w, struct{ Name, Age string }{name, age})
+	err = t.Execute(w, map[string]interface{}{"name": name, "age": age})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
